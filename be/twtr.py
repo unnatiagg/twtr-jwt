@@ -108,8 +108,21 @@ def decode_token(token):
 ####################
 # Security Endpoints
 ####################
-@app.route("/doc")
+@app.route("/")
 def home(): 
+    return """Welcome to online mongo/twitter testing ground!<br />
+        <br />
+        Run the following endpoints:<br />
+        From collection:<br/>
+        http://localhost:5000/tweets<br />
+        http://localhost:5000/tweets-week<br />
+        http://localhost:5000/tweets-week-results<br />
+        Create new data:<br />
+        http://localhost:5000/mock-tweets<br />
+        Optionally, to purge database: http://localhost:5000/purge-db"""
+
+@app.route("/doc")
+def doc(): 
     return """Welcome to online mongo/twitter testing ground!<br />
         <br />
         Run the following endpoints:<br />
