@@ -18,7 +18,7 @@ const THome = () => {
 	    setLoading(false);
     };
  
-    print("Home.js: fetching from " + `${process.env.REACT_APP_API_SERVICE_URL}/tweets-results`)
+    console.log("Home.js: fetching from " + `${process.env.REACT_APP_API_SERVICE_URL}/tweets-results`)
     fetchData();
   }, []);
 
