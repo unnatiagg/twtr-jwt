@@ -3,7 +3,7 @@
 ###########
 
 # pull official base image
-FROM node as builder
+FROM node:15.2.0-alpine as builder
 
 # set working directory
 WORKDIR /usr/src/app
@@ -13,10 +13,8 @@ ENV PATH /usr/src/app/node_modules/.bin:$PATH
 
 # install and cache app dependencies
 COPY package.json .
-RUN npm install
-#COPY package-lock.json .
-#RUN npm ci
-# npm ERR! network request to https://registry.npmjs.org/yargs-parser/-/yargs-parser-13.1.2.tgz failed, reason: getaddrinfo ENOTFOUND registry.npmjs.org
+COPY package-lock.json .
+RUN npm ci
 RUN npm install react-scripts@4.0.0 --silent
 
 # set environment variables
