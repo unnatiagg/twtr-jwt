@@ -1,6 +1,7 @@
 from flask import Flask, flash, request, jsonify, render_template, redirect, url_for, g, session, send_from_directory, abort
 from flask_cors import CORS
-from flask_api import status
+#from flask_api import status
+import http
 from datetime import date, datetime, timedelta
 from calendar import monthrange
 from dateutil.parser import parse
@@ -31,8 +32,8 @@ import jwt
 g = dict()
 
 # mongo
-#mongo_client = MongoClient('mongodb://localhost:27017/')
-mongo_client = MongoClient("mongodb+srv://admin:admin@tweets.8ugzv.mongodb.net/tweets?retryWrites=true&w=majority")
+mongo_client = MongoClient('mongodb://localhost:27017/')
+#mongo_client = MongoClient("mongodb+srv://admin:admin@tweets.8ugzv.mongodb.net/tweets?retryWrites=true&w=majority")
 class MyMongo(object):
     def __init__(self, db_name):
         self.db_name = db_name
@@ -161,10 +162,10 @@ def login():
         print('users:', get_env_var('users'))
         if not user or not password:
             print('not user or not password!')
-            return jsonify(("Authentication is required and has failed!", status.HTTP_401_UNAUTHORIZED))
+            return jsonify(("Authentication is required and has failed!", http.HTTPStatus.UNAUTHORIZED))
         elif not user in get_env_var('users'):
             print('unknown user!')
-            return jsonify(("Unknown user!", status.HTTP_401_UNAUTHORIZED))
+            return jsonify(("Unknown user!", http.HTTPStatus.UNAUTHORIZED))
         else:
             # presumably we only store password hashes and compare passed pwd
             # with our stored hash. For simplicity, we store the full password
@@ -176,7 +177,7 @@ def login():
             a = datetime.now()
             if not bcrypt.check_password_hash(password_hash, password):
                 print('bcrypt.check_password_hash(password_hash, password) returned False!')
-                return jsonify(("Authentication is required and has failed!", status.HTTP_401_UNAUTHORIZED))
+                return jsonify(("Authentication is required and has failed!", http.HTTPStatus.UNAUTHORIZEDD))
             b = datetime.now()
             print('check_password took:', b - a)
             # debugging
@@ -205,10 +206,10 @@ def login():
             }
             #return response_object, 200
             #return response_object
-            return jsonify((response_object, status.HTTP_200_OK))
+            return jsonify((response_object, http.HTTPStatus.OK))
     except Exception as e:
         print('exception:', e)
-        return jsonify(("Authentication is required and has failed!", status.HTTP_401_UNAUTHORIZED))
+        return jsonify(("Authentication is required and has failed!", http.HTTPStatus.UNAUTHORIZED))
 
 
 # Returns an encoded userid. Requires both tokens. If access token expired 
@@ -224,21 +225,21 @@ def fastlogin():
         refresh_token = request.json['refresh-token']
 
         if not access_token or not refresh_token:
-            return jsonify(("Missing token(s)!", status.HTTP_401_UNAUTHORIZED))
+            return jsonify(("Missing token(s)!", http.HTTPStatus.UNAUTHORIZED))
         else:
             try:
                 # first, with access token:
                 userid = decode_token(access_token)
 
                 if not userid or not userid in get_env_var('userids'):
-                    return jsonify(("User unknown, please login with username and password.", status.HTTP_401_UNAUTHORIZED))
+                    return jsonify(("User unknown, please login with username and password.", http.HTTPStatus.UNAUTHORIZED))
 
                 try:
                     # second, with refresh token
                     userid2 = decode_token(refresh_token)
 
                     if not userid2 or userid2 != userid:
-                        return jsonify(("User unknown, please login with username and password.", status.HTTP_401_UNAUTHORIZED))
+                        return jsonify(("User unknown, please login with username and password.", http.HTTPStatus.UNAUTHORIZED))
 
                     # issue a new access token, keep the same refresh token
                     access_token = encode_token(userid, "access")
@@ -246,24 +247,24 @@ def fastlogin():
                         "access_token": access_token.decode(),
                         "refresh_token": refresh_token,
                     }
-                    return jsonify((response_object, status.HTTP_200_OK))
+                    return jsonify((response_object, http.HTTPStatus.OK))
 
                 # refresh token failure: Need username/pwd login
                 except jwt.ExpiredSignatureError:
-                    return jsonify(("Lease expired. Please log in with username and password.", status.HTTP_401_UNAUTHORIZED))
+                    return jsonify(("Lease expired. Please log in with username and password.", http.HTTPStatus.UNAUTHORIZED))
                 
                 except jwt.InvalidTokenError:
-                    return jsonify(("Invalid token. Please log in with username and password.", status.HTTP_401_UNAUTHORIZED))
+                    return jsonify(("Invalid token. Please log in with username and password.", http.HTTPStatus.UNAUTHORIZED))
 
             # access token failure: Need at least fast login
             except jwt.ExpiredSignatureError:
-                return jsonify(("Signature expired. Please fast log in.", status.HTTP_401_UNAUTHORIZED))
+                return jsonify(("Signature expired. Please fast log in.", http.HTTPStatus.UNAUTHORIZED))
             
             except jwt.InvalidTokenError:
-                return jsonify(("Invalid token. Please fast log in.", status.HTTP_401_UNAUTHORIZED))
+                return jsonify(("Invalid token. Please fast log in.", http.HTTPStatus.UNAUTHORIZED))
 
     except:
-        return jsonify(("Missing token or other error. Please log in with username and password.", status.HTTP_401_UNAUTHORIZED))
+        return jsonify(("Missing token or other error. Please log in with username and password.", http.HTTPStatus.UNAUTHORIZED))
 
 
 def verify_token(token):
@@ -275,16 +276,16 @@ def verify_token(token):
 
         if userid is None or not userid in get_env_var('userids'):
             print("verify_token() returning False")
-            return False, jsonify(("User unknown!", status.HTTP_401_UNAUTHORIZED))
+            return False, jsonify(("User unknown!", http.HTTPStatus.UNAUTHORIZED))
         else:
             print("verify_token() returning True")
             return True, userid
 
     except jwt.ExpiredSignatureError:
-        return False, jsonify(("Signature expired. Please log in.", status.HTTP_401_UNAUTHORIZED))
+        return False, jsonify(("Signature expired. Please log in.", http.HTTPStatus.UNAUTHORIZED))
 
     except jwt.InvalidTokenError:
-        return False, jsonify(("Invalid token. Please log in.", status.HTTP_401_UNAUTHORIZED))
+        return False, jsonify(("Invalid token. Please log in.", http.HTTPStatus.UNAUTHORIZED))
 
 
 ################
@@ -669,17 +670,26 @@ def mock_tweets():
 # ADMINISTRATION #
 ##################
 
+initialized = False
+def initialize():
+    global initialized
+    if not initialized:
+        set_env_var()
+        applyCollectionLevelUpdates()
+        initialized = True
+
 # This runs once before the first single request
 # Used to bootstrap our collections
-@app.before_first_request
-def before_first_request_func():
-    set_env_var()
-    applyCollectionLevelUpdates()
+#@app.before_first_request
+#def before_first_request_func():
+#    set_env_var()
+#    applyCollectionLevelUpdates()
 
-# This runs once before any request
 @app.before_request
 def before_request_func():
+    initialize()
     applyRecordLevelUpdates()
+
 
 
 ############################
