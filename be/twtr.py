@@ -32,8 +32,7 @@ import jwt
 g = dict()
 
 # mongo
-mongo_client = MongoClient('mongodb://localhost:27017/')
-#mongo_client = MongoClient("mongodb+srv://admin:admin@tweets.8ugzv.mongodb.net/tweets?retryWrites=true&w=majority")
+mongo_client = MongoClient('mongodb://mongo:27017/')
 class MyMongo(object):
     def __init__(self, db_name):
         self.db_name = db_name
@@ -292,20 +291,20 @@ def verify_token(token):
 # Apply to mongo
 ################
 
-def atlas_connect():
-    # Node
-    # const MongoClient = require('mongodb').MongoClient;
-    # const uri = "mongodb+srv://admin:<password>@tweets.8ugzv.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-    # const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-    # client.connect(err => {
-    # const collection = client.db("test").collection("devices");
-    # // perform actions on the collection object
-    # client.close();
-    # });
-
-    # Python
-    client = pymongo.MongoClient("mongodb+srv://admin:<password>@tweets.8ugzv.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
-    db = client.test
+# def atlas_connect():
+#     # Node
+#     # const MongoClient = require('mongodb').MongoClient;
+#     # const uri = "mongodb+srv://admin:<password>@tweets.8ugzv.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+#     # const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+#     # client.connect(err => {
+#     # const collection = client.db("test").collection("devices");
+#     # // perform actions on the collection object
+#     # client.close();
+#     # });
+#
+#     # Python
+#     client = pymongo.MongoClient("mongodb+srv://admin:<password>@tweets.8ugzv.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+#     db = client.test
 
 
 # database access layer
@@ -437,15 +436,15 @@ def add_tweet():
     private = request.json['private']
     pic = request.json['pic']
 
-    access_token = request.json['access-token']
-    print("access_token:", access_token)
-    permission = verify_token(access_token)
-    if not permission[0]: 
-        print("tweet submission denied due to invalid token!")
-        print(permission[1])
-        return permission[1]
-    else:
-        print('access token accepted!')
+    # access_token = request.json['access-token']
+    # print("access_token:", access_token)
+    # permission = verify_token(access_token)
+    # if not permission[0]:
+    #     print("tweet submission denied due to invalid token!")
+    #     print(permission[1])
+    #     return permission[1]
+    # else:
+    #     print('access token accepted!')
 
     tweet = dict(user=user, description=description, private=private,
                 upvote=0, date=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),

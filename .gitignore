@@ -3,4 +3,6 @@ node_modules
 build
 .coverage
 env
-
+**/myenv/**
+**/be.iml
+/.idea

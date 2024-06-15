@@ -12,6 +12,5 @@ PyJWT
 python-dateutil
 pytz
 dnspython
-bson
 jwt
 
