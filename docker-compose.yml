@@ -2,13 +2,13 @@ version: '3.1'
 
 services:
 
-  mongo:
-    image: mongo:latest
-    container_name: mongo
-    ports:
-      - 27017:27017
-    networks:
-      - backend
+  #mongo:
+    #image: mongo:latest
+    #container_name: mongo
+    #ports:
+    #  - 27017:27017
+    #networks:
+    #  - backend
 
   be:
     build:
@@ -17,8 +17,8 @@ services:
     ports:
       - 5000:5000
     environment:
-      - DATABASE_URL=mongodb://mongo:27017/
-      - DATABASE_TEST_URL=mongodb://mongo:27017/
+      - DATABASE_URL=mongodb+srv://unnatiaggarwal13:H2xSOwdoPcZAsKO8@cluster0.3sfln4d.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+      - DATABASE_TEST_URL=mongodb+srv://unnatiaggarwal13:H2xSOwdoPcZAsKO8@cluster0.3sfln4d.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
     networks:
       - backend
 
