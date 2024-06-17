@@ -9,9 +9,6 @@ phases:
   pre_build:
     commands:
       - echo logging into my dockerhub
-      - > 
-        echo $DOCKER_PASSWORD \
-          | docker login --username unnatiagg344 --password-stdin
       - echo logging in to ecr...
       - >
         aws ecr get-login-password --region $AWS_REGION \
