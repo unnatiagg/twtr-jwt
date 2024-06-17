@@ -6,9 +6,6 @@ env:
     REACT_APP_API_SERVICE_URL: "http://flask-react-alb-961735377.us-east-1.elb.amazonaws.com"
 
 phases:
-  install:
-    runtime-versions:
-      docker: 20
   pre_build:
     commands:
       - echo logging in to ecr...
